@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings — The Sharp Chair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">THE <span>SHARP</span> CHAIR</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="my_bookings.html" class="active">My Bookings</a></li>
+      <li><a href="login.html">Sign In</a></li>
+      <li><a href="book.html" class="nav-cta">Book Now</a></li>
+    </ul>
+  </nav>
+
+  <!-- ── PAGE HEADER ── -->
+  <header class="page-header fade-up">
+    <div class="page-header-eyebrow">Your Account</div>
+    <h1>MY <span class="accent">BOOKINGS</span></h1>
+    <p>View, edit, or cancel your upcoming and past appointments.</p>
+  </header>
+
+  <!-- ── BOOKINGS LIST ── -->
+  <div class="bookings-wrap">
+    <div id="bookings-container"></div>
+  </div>
+
+  <!-- ── EDIT MODAL ── -->
+  <div class="modal-overlay" id="edit-modal">
+    <div class="modal">
+      <h3 class="modal-title">EDIT BOOKING</h3>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="edit-date">New Date</label>
+          <input type="date" class="form-control" id="edit-date" onchange="loadEditSlots()">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-time">New Time</label>
+          <select class="form-control" id="edit-time"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-notes">Notes</label>
+          <textarea class="form-control" id="edit-notes" style="min-height:80px;"></textarea>
+        </div>
+        <div id="edit-error" class="alert alert-error" style="display:none;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-logo">THE <span>SHARP</span> CHAIR</div>
+    <p class="footer-copy">&copy; 2025 The Sharp Chair. All rights reserved.</p>
+    <nav class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+      <a href="book.html">Book</a>
+    </nav>
+  </footer>
+
+  <script>
+    const SERVICES = {
+      1: { name: 'Classic Haircut',    price: 18, duration: 30 },
+      2: { name: 'Fade & Blend',       price: 22, duration: 45 },
+      3: { name: 'Beard Trim',         price: 12, duration: 20 },
+      4: { name: 'Hot Towel Shave',    price: 25, duration: 40 },
+      5: { name: 'Cut & Beard Combo',  price: 30, duration: 60 },
+      6: { name: 'Kids Cut',           price: 12, duration: 20 },
+    };
+    const BARBERS = {
+      1: { name: 'Marco V.' },
+      2: { name: 'Danny K.' },
+      3: { name: 'Priya S.' },
+    };
+
+    let editingId = null;
+
+    /* ── Load and render bookings ── */
+    function getBookings() {
+      return JSON.parse(localStorage.getItem('sharpchair_bookings') || '[]');
+    }
+
+    function saveBookings(arr) {
+      localStorage.setItem('sharpchair_bookings', JSON.stringify(arr));
+    }
+
+    function renderBookings() {
+      const bookings = getBookings().sort((a, b) =>
+        new Date(b.date + 'T' + b.time) - new Date(a.date + 'T' + a.time)
+      );
+      const container = document.getElementById('bookings-container');
+
+      if (bookings.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">📅</div>
+            <p>You haven't made any bookings yet.</p>
+            <a href="book.html" class="btn btn-primary">Book Your First Appointment</a>
+          </div>`;
+        return;
+      }
+
+      const items = bookings.map(b => {
+        const svc = SERVICES[b.serviceId] || { name: 'Unknown', price: 0 };
+        const barb = BARBERS[b.barberId] || { name: 'Unknown' };
+        const dateObj = new Date(b.date + 'T12:00');
+        const isPast = new Date(b.date + 'T' + b.time) < new Date();
+        const dateStr = dateObj.toLocaleDateString('en-GB', {
+          weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+        });
+
+        const statusBadge = b.status === 'cancelled'
+          ? '<span class="badge badge-cancelled">Cancelled</span>'
+          : isPast
+          ? '<span class="badge badge-past">Past</span>'
+          : '<span class="badge badge-confirmed">Confirmed</span>';
+
+        const actions = (b.status !== 'cancelled' && !isPast)
+          ? `<button class="btn btn-ghost btn-sm" onclick="openEditModal(${b.id})">Edit</button>
+             <button class="btn btn-danger btn-sm" onclick="cancelBooking(${b.id})">Cancel</button>`
+          : '';
+
+        return `
+          <div class="booking-card ${b.status === 'cancelled' ? 'is-cancelled' : ''}">
+            <div>
+              <div class="booking-card-top">
+                <div class="booking-card-service">${svc.name}</div>
+                ${statusBadge}
+              </div>
+              <div class="booking-card-meta">
+                <span>📅 ${dateStr}</span>
+                <span>🕐 ${b.time}</span>
+                <span>💈 ${barb.name}</span>
+                <span>£${svc.price}</span>
+              </div>
+              ${b.notes ? `<div style="margin-top:8px; font-size:0.8rem; color:var(--muted);">📝 ${b.notes}</div>` : ''}
+              <div class="booking-card-ref">REF: #${b.ref}</div>
+            </div>
+            <div class="booking-card-actions">${actions}</div>
+          </div>`;
+      });
+
+      container.innerHTML = `<div class="bookings-list">${items.join('')}</div>`;
+    }
+
+    /* ── Cancel ── */
+    function cancelBooking(id) {
+      if (!confirm('Are you sure you want to cancel this booking? This cannot be undone.')) return;
+      const bookings = getBookings();
+      const b = bookings.find(x => x.id === id);
+      if (b) { b.status = 'cancelled'; saveBookings(bookings); renderBookings(); }
+    }
+
+    /* ── Edit modal ── */
+    function openEditModal(id) {
+      editingId = id;
+      const bookings = getBookings();
+      const b = bookings.find(x => x.id === id);
+      if (!b) return;
+
+      document.getElementById('edit-date').value = b.date;
+      document.getElementById('edit-notes').value = b.notes || '';
+      document.getElementById('edit-error').style.display = 'none';
+
+      // Set min date
+      const minD = new Date();
+      while (minD.getDay() === 0 || minD.getDay() === 6) minD.setDate(minD.getDate() + 1);
+      document.getElementById('edit-date').min = minD.toISOString().split('T')[0];
+
+      loadEditSlots(b.time);
+      document.getElementById('edit-modal').classList.add('is-open');
+    }
+
+    function loadEditSlots(selectedTime) {
+      const bookings = getBookings();
+      const b = bookings.find(x => x.id === editingId);
+      if (!b) return;
+
+      const date = document.getElementById('edit-date').value;
+      if (!date) return;
+
+      const svc  = SERVICES[b.serviceId] || { duration: 30 };
+      const taken = bookings
+        .filter(bk => bk.barberId === b.barberId && bk.date === date && bk.status !== 'cancelled' && bk.id !== editingId)
+        .map(bk => bk.time);
+
+      const sel = document.getElementById('edit-time');
+      sel.innerHTML = '';
+
+      for (let h = 8; h < 20; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          if (h * 60 + m + svc.duration > 20 * 60) continue;
+          const label = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+          if (taken.includes(label)) continue;
+          const opt = document.createElement('option');
+          opt.value = label;
+          opt.textContent = label;
+          if (label === (selectedTime || b.time)) opt.selected = true;
+          sel.appendChild(opt);
+        }
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('edit-modal').classList.remove('is-open');
+      editingId = null;
+    }
+
+    function saveEdit() {
+      const newDate  = document.getElementById('edit-date').value;
+      const newTime  = document.getElementById('edit-time').value;
+      const newNotes = document.getElementById('edit-notes').value.trim();
+
+      if (!newDate || !newTime) {
+        const err = document.getElementById('edit-error');
+        err.textContent = 'Please select a date and time.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const d = new Date(newDate + 'T12:00');
+      if (d.getDay() === 0 || d.getDay() === 6) {
+        const err = document.getElementById('edit-error');
+        err.textContent = 'The shop is closed on weekends. Please pick a weekday.';
+        err.style.display = 'block';
+        return;
+      }
+
+      const bookings = getBookings();
+      const b = bookings.find(x => x.id === editingId);
+      if (b) {
+        b.date  = newDate;
+        b.time  = newTime;
+        b.notes = newNotes;
+        saveBookings(bookings);
+      }
+
+      closeModal();
+      renderBookings();
+    }
+
+    /* ── Close modal on overlay click ── */
+    document.getElementById('edit-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    /* ── Init ── */
+    renderBookings();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — The Sharp Chair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">THE <span>SHARP</span> CHAIR</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="my_bookings.html">My Bookings</a></li>
+      <li><a href="login.html">Sign In</a></li>
+      <li><a href="book.html" class="nav-cta">Book Now</a></li>
+    </ul>
+  </nav>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+
+      <div class="auth-logo">THE <span>SHARP</span> CHAIR</div>
+
+      <h1 class="auth-title">CREATE ACCOUNT</h1>
+      <p class="auth-sub">Register to start booking appointments online.</p>
+
+      <div id="reg-error"   class="alert alert-error"   style="display:none;"></div>
+      <div id="reg-success" class="alert alert-success" style="display:none;"></div>
+
+      <!--
+        Django form:
+        <form method="POST" action="{% url 'register' %}">
+          {% csrf_token %}
+      -->
+      <div class="auth-form">
+        <div class="form-grid" style="gap:1rem;">
+          <div class="form-group">
+            <label class="form-label" for="reg-fname">First Name <span style="color:var(--red)">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              id="reg-fname"
+              name="first_name"
+              placeholder="James"
+              autocomplete="given-name"
+              required
+            >
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-lname">Last Name <span style="color:var(--red)">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              id="reg-lname"
+              name="last_name"
+              placeholder="Anderson"
+              autocomplete="family-name"
+              required
+            >
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email Address <span style="color:var(--red)">*</span></label>
+          <input
+            type="email"
+            class="form-control"
+            id="reg-email"
+            name="email"
+            placeholder="your@email.com"
+            autocomplete="email"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-phone">Phone Number</label>
+          <input
+            type="tel"
+            class="form-control"
+            id="reg-phone"
+            name="phone"
+            placeholder="+44 7700 900000"
+            autocomplete="tel"
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password <span style="color:var(--red)">*</span></label>
+          <input
+            type="password"
+            class="form-control"
+            id="reg-password"
+            name="password1"
+            placeholder="Min. 8 characters"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password2">Confirm Password <span style="color:var(--red)">*</span></label>
+          <input
+            type="password"
+            class="form-control"
+            id="reg-password2"
+            name="password2"
+            placeholder="Repeat password"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+        <button type="button" class="btn btn-primary btn-full" onclick="doRegister()">
+          Create Account
+        </button>
+      </div>
+      <!--
+        </form>
+      -->
+
+      <div class="auth-divider">
+        Already have an account? <a href="login.html">Sign in</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-logo">THE <span>SHARP</span> CHAIR</div>
+    <p class="footer-copy">&copy; 2025 The Sharp Chair. All rights reserved.</p>
+    <nav class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+    </nav>
+  </footer>
+
+  <script>
+    /* Demo register — replace with Django form submit */
+    function doRegister() {
+      const fn    = document.getElementById('reg-fname').value.trim();
+      const ln    = document.getElementById('reg-lname').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const pass1 = document.getElementById('reg-password').value;
+      const pass2 = document.getElementById('reg-password2').value;
+
+      const errEl  = document.getElementById('reg-error');
+      const succEl = document.getElementById('reg-success');
+      errEl.style.display  = 'none';
+      succEl.style.display = 'none';
+
+      if (!fn || !ln || !email || !pass1 || !pass2) {
+        errEl.textContent = 'Please fill in all required fields.';
+        errEl.style.display = 'block';
+        return;
+      }
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      if (!emailOk) {
+        errEl.textContent = 'Please enter a valid email address.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if (pass1.length < 8) {
+        errEl.textContent = 'Password must be at least 8 characters.';
+        errEl.style.display = 'block';
+        return;
+      }
+      if (pass1 !== pass2) {
+        errEl.textContent = 'Passwords do not match.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const users = JSON.parse(localStorage.getItem('sharpchair_users') || '[]');
+      if (users.find(u => u.email === email)) {
+        errEl.textContent = 'An account with this email already exists.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const user = { id: Date.now(), fname: fn, lname: ln, email, phone, password: pass1 };
+      users.push(user);
+      localStorage.setItem('sharpchair_users', JSON.stringify(users));
+      localStorage.setItem('sharpchair_current_user', JSON.stringify(user));
+
+      succEl.textContent = `Account created! Redirecting...`;
+      succEl.style.display = 'block';
+      setTimeout(() => { window.location.href = 'my_bookings.html'; }, 1200);
+    }
+  </script>
+
+</body>
+</html>

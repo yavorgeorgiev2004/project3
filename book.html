@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Appointment — The Sharp Chair</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="static/css/style.css">
+  <style>
+    /* ── Inline JS-driven state helpers ── */
+    .pick-card.selected  { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+    .barber-pick-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+    .time-slot.is-selected { background: var(--gold); border-color: var(--gold); color: var(--black); font-weight: 600; }
+    .time-slot.is-taken { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <a href="index.html" class="nav-logo">THE <span>SHARP</span> CHAIR</a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="services.html">Services</a></li>
+      <li><a href="my_bookings.html">My Bookings</a></li>
+      <li><a href="login.html">Sign In</a></li>
+      <li><a href="book.html" class="nav-cta active">Book Now</a></li>
+    </ul>
+  </nav>
+
+  <div class="booking-layout">
+
+    <!-- ── STEP PROGRESS ── -->
+    <div class="step-progress" id="step-progress">
+      <div class="step-item active" id="prog-1">
+        <div class="step-bubble">1</div>
+        <div class="step-text">Service</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" id="prog-2">
+        <div class="step-bubble">2</div>
+        <div class="step-text">Barber</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" id="prog-3">
+        <div class="step-bubble">3</div>
+        <div class="step-text">Date &amp; Time</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" id="prog-4">
+        <div class="step-bubble">4</div>
+        <div class="step-text">Details</div>
+      </div>
+      <div class="step-connector"></div>
+      <div class="step-item" id="prog-5">
+        <div class="step-bubble">5</div>
+        <div class="step-text">Confirm</div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 1 — SERVICE ══ -->
+    <section class="step-section active" id="step-1">
+      <h2 class="step-heading">CHOOSE A SERVICE</h2>
+      <p class="step-subheading">Select what you'd like today. All prices include a hot towel finish.</p>
+
+      <div class="pick-grid">
+        <div class="pick-card" data-service="1" onclick="selectService(this, 1)">
+          <span class="pick-card-icon">✂️</span>
+          <div class="pick-card-name">Classic Haircut</div>
+          <div class="pick-card-sub">30 min</div>
+          <div class="pick-card-price">£18</div>
+        </div>
+        <div class="pick-card" data-service="2" onclick="selectService(this, 2)">
+          <span class="pick-card-icon">🪒</span>
+          <div class="pick-card-name">Fade &amp; Blend</div>
+          <div class="pick-card-sub">45 min</div>
+          <div class="pick-card-price">£22</div>
+        </div>
+        <div class="pick-card" data-service="3" onclick="selectService(this, 3)">
+          <span class="pick-card-icon">🧔</span>
+          <div class="pick-card-name">Beard Trim</div>
+          <div class="pick-card-sub">20 min</div>
+          <div class="pick-card-price">£12</div>
+        </div>
+        <div class="pick-card" data-service="4" onclick="selectService(this, 4)">
+          <span class="pick-card-icon">🫧</span>
+          <div class="pick-card-name">Hot Towel Shave</div>
+          <div class="pick-card-sub">40 min</div>
+          <div class="pick-card-price">£25</div>
+        </div>
+        <div class="pick-card" data-service="5" onclick="selectService(this, 5)">
+          <span class="pick-card-icon">💈</span>
+          <div class="pick-card-name">Cut &amp; Beard Combo</div>
+          <div class="pick-card-sub">60 min</div>
+          <div class="pick-card-price">£30</div>
+        </div>
+        <div class="pick-card" data-service="6" onclick="selectService(this, 6)">
+          <span class="pick-card-icon">🧒</span>
+          <div class="pick-card-name">Kids Cut</div>
+          <div class="pick-card-sub">20 min</div>
+          <div class="pick-card-price">£12</div>
+        </div>
+      </div>
+
+      <div id="err-1" class="alert alert-error" style="display:none;">Please select a service to continue.</div>
+
+      <div class="step-nav">
+        <a href="index.html" class="btn btn-ghost">← Back</a>
+        <button class="btn btn-primary" onclick="goTo(2)">Continue →</button>
+      </div>
+    </section>
+
+    <!-- ══ STEP 2 — BARBER ══ -->
+    <section class="step-section" id="step-2">
+      <h2 class="step-heading">CHOOSE YOUR BARBER</h2>
+      <p class="step-subheading">Any preference? All barbers are fully qualified and experienced.</p>
+
+      <div class="barber-pick-grid">
+        <div class="barber-pick-card" data-barber="1" onclick="selectBarber(this, 1)">
+          <div class="barber-avatar">💈</div>
+          <div class="barber-pick-name">Marco V.</div>
+          <div class="barber-pick-spec">Fades &amp; Skin Fades</div>
+        </div>
+        <div class="barber-pick-card" data-barber="2" onclick="selectBarber(this, 2)">
+          <div class="barber-avatar">✂️</div>
+          <div class="barber-pick-name">Danny K.</div>
+          <div class="barber-pick-spec">Classic Cuts &amp; Shaves</div>
+        </div>
+        <div class="barber-pick-card" data-barber="3" onclick="selectBarber(this, 3)">
+          <div class="barber-avatar">🪒</div>
+          <div class="barber-pick-name">Priya S.</div>
+          <div class="barber-pick-spec">Textured &amp; Curly Hair</div>
+        </div>
+      </div>
+
+      <div id="err-2" class="alert alert-error" style="display:none;">Please choose a barber to continue.</div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" onclick="goTo(1)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(3)">Continue →</button>
+      </div>
+    </section>
+
+    <!-- ══ STEP 3 — DATE & TIME ══ -->
+    <section class="step-section" id="step-3">
+      <h2 class="step-heading">DATE &amp; TIME</h2>
+      <p class="step-subheading">We're open Monday to Friday, 8:00am – 8:00pm. Weekends closed.</p>
+
+      <div class="datetime-row">
+        <div>
+          <div class="dt-block-label">Select Date</div>
+          <input type="date" class="form-control" id="booking-date" onchange="onDateChange()">
+        </div>
+        <div>
+          <div class="dt-block-label">Available Times</div>
+          <div class="time-slot-grid" id="time-slots">
+            <span class="time-slot-hint">Pick a date first</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="err-3" class="alert alert-error" style="display:none;">Please select a date and time slot.</div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" onclick="goTo(2)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(4)">Continue →</button>
+      </div>
+    </section>
+
+    <!-- ══ STEP 4 — DETAILS ══ -->
+    <section class="step-section" id="step-4">
+      <h2 class="step-heading">YOUR DETAILS</h2>
+      <p class="step-subheading">We use these to confirm your booking and send reminders.</p>
+
+      <div class="form-grid mb-3">
+        <div class="form-group">
+          <label class="form-label" for="fname">First Name <span style="color:var(--red)">*</span></label>
+          <input type="text" class="form-control" id="fname" name="fname" placeholder="James" autocomplete="given-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="lname">Last Name <span style="color:var(--red)">*</span></label>
+          <input type="text" class="form-control" id="lname" name="lname" placeholder="Anderson" autocomplete="family-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address <span style="color:var(--red)">*</span></label>
+          <input type="email" class="form-control" id="email" name="email" placeholder="james@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number <span style="color:var(--red)">*</span></label>
+          <input type="tel" class="form-control" id="phone" name="phone" placeholder="+44 7700 900000" autocomplete="tel">
+        </div>
+        <div class="form-group full">
+          <label class="form-label" for="notes">Notes <span style="color:var(--muted)">(optional)</span></label>
+          <textarea class="form-control" id="notes" name="notes" placeholder="Any special requests, allergies, or preferences..."></textarea>
+        </div>
+      </div>
+
+      <div id="err-4" class="alert alert-error" style="display:none;">Please fill in all required fields.</div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" onclick="goTo(3)">← Back</button>
+        <button class="btn btn-primary" onclick="goTo(5)">Review Booking →</button>
+      </div>
+    </section>
+
+    <!-- ══ STEP 5 — CONFIRM ══ -->
+    <section class="step-section" id="step-5">
+      <h2 class="step-heading">CONFIRM BOOKING</h2>
+      <p class="step-subheading">Please check everything below before confirming.</p>
+
+      <div class="summary-card" id="booking-summary">
+        <!-- Populated by JS -->
+      </div>
+
+      <div id="err-5" class="alert alert-error" style="display:none;"></div>
+
+      <div class="step-nav">
+        <button class="btn btn-ghost" onclick="goTo(4)">← Edit</button>
+        <button class="btn btn-primary" onclick="submitBooking()">Confirm &amp; Book ✓</button>
+      </div>
+    </section>
+
+    <!-- ══ STEP 6 — SUCCESS ══ -->
+    <section class="step-section" id="step-6">
+      <div class="confirm-box">
+        <div class="confirm-check">✓</div>
+        <h2 class="confirm-title">BOOKING CONFIRMED!</h2>
+        <p class="confirm-sub">
+          Your appointment is locked in. We'll see you at the shop.<br>
+          A confirmation has been saved to your account.
+        </p>
+        <div class="confirm-ref" id="confirm-ref">REF: #000000</div>
+        <div class="confirm-actions">
+          <a href="my_bookings.html" class="btn btn-primary">View My Bookings</a>
+          <button class="btn btn-ghost" onclick="resetWizard()">Book Another</button>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /booking-layout -->
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="footer-logo">THE <span>SHARP</span> CHAIR</div>
+    <p class="footer-copy">&copy; 2025 The Sharp Chair. All rights reserved.</p>
+    <nav class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="services.html">Services</a>
+    </nav>
+  </footer>
+
+  <!-- ── BOOKING SCRIPT ── -->
+  <script>
+    /* ── Data ── */
+    const SERVICES = {
+      1: { name: 'Classic Haircut',    price: 18, duration: 30 },
+      2: { name: 'Fade & Blend',       price: 22, duration: 45 },
+      3: { name: 'Beard Trim',         price: 12, duration: 20 },
+      4: { name: 'Hot Towel Shave',    price: 25, duration: 40 },
+      5: { name: 'Cut & Beard Combo',  price: 30, duration: 60 },
+      6: { name: 'Kids Cut',           price: 12, duration: 20 },
+    };
+    const BARBERS = {
+      1: { name: 'Marco V.', spec: 'Fades & Skin Fades' },
+      2: { name: 'Danny K.', spec: 'Classic Cuts & Shaves' },
+      3: { name: 'Priya S.', spec: 'Textured & Curly Hair' },
+    };
+
+    /* ── State ── */
+    let state = { serviceId: null, barberId: null, date: null, time: null };
+
+    /* ── Service selection ── */
+    function selectService(el, id) {
+      document.querySelectorAll('.pick-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      state.serviceId = id;
+      document.getElementById('err-1').style.display = 'none';
+    }
+
+    /* ── Barber selection ── */
+    function selectBarber(el, id) {
+      document.querySelectorAll('.barber-pick-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      state.barberId = id;
+      document.getElementById('err-2').style.display = 'none';
+    }
+
+    /* ── Date changed ── */
+    function onDateChange() {
+      const val = document.getElementById('booking-date').value;
+      if (!val) return;
+      const d = new Date(val + 'T12:00:00');
+      const dow = d.getDay();
+      if (dow === 0 || dow === 6) {
+        showError(3, 'The shop is closed on weekends. Please pick a weekday.');
+        document.getElementById('booking-date').value = '';
+        state.date = null;
+        document.getElementById('time-slots').innerHTML = '<span class="time-slot-hint">Pick a weekday date</span>';
+        return;
+      }
+      state.date = val;
+      state.time = null;
+      generateSlots(val);
+      document.getElementById('err-3').style.display = 'none';
+    }
+
+    /* ── Generate time slots ── */
+    function generateSlots(date) {
+      const svc = SERVICES[state.serviceId] || { duration: 30 };
+      const dur = svc.duration;
+
+      // Simulate some taken slots from localStorage
+      const stored = JSON.parse(localStorage.getItem('sharpchair_bookings') || '[]');
+      const taken = stored
+        .filter(b => b.barberId === state.barberId && b.date === date && b.status !== 'cancelled')
+        .map(b => b.time);
+
+      const container = document.getElementById('time-slots');
+      container.innerHTML = '';
+      let count = 0;
+
+      for (let h = 8; h < 20; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          if (h * 60 + m + dur > 20 * 60) continue;
+          const label = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+          const isTaken = taken.includes(label);
+          const el = document.createElement('div');
+          el.className = 'time-slot' + (isTaken ? ' is-taken' : '') + (state.time === label && !isTaken ? ' is-selected' : '');
+          el.textContent = label;
+          if (!isTaken) el.onclick = () => pickSlot(el, label);
+          container.appendChild(el);
+          count++;
+        }
+      }
+
+      if (count === 0) container.innerHTML = '<span class="time-slot-hint">No slots available</span>';
+    }
+
+    function pickSlot(el, t) {
+      document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('is-selected'));
+      el.classList.add('is-selected');
+      state.time = t;
+      document.getElementById('err-3').style.display = 'none';
+    }
+
+    /* ── Step navigation ── */
+    function goTo(n) {
+      if (!validate(currentStep())) return;
+      setStep(n);
+      if (n === 5) renderSummary();
+    }
+
+    function currentStep() {
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById('step-' + i);
+        if (el && el.classList.contains('active')) return i;
+      }
+      return 1;
+    }
+
+    function setStep(n) {
+      document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById('step-' + n);
+      if (target) target.classList.add('active');
+
+      for (let i = 1; i <= 5; i++) {
+        const prog = document.getElementById('prog-' + i);
+        if (!prog) continue;
+        prog.classList.remove('active', 'done');
+        if (i < n) prog.classList.add('done');
+        else if (i === n) prog.classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── Validation ── */
+    function validate(step) {
+      if (step === 1) {
+        if (!state.serviceId) { showError(1, 'Please select a service to continue.'); return false; }
+      }
+      if (step === 2) {
+        if (!state.barberId) { showError(2, 'Please choose a barber to continue.'); return false; }
+      }
+      if (step === 3) {
+        if (!state.date) { showError(3, 'Please select a date.'); return false; }
+        if (!state.time) { showError(3, 'Please select a time slot.'); return false; }
+      }
+      if (step === 4) {
+        const fn = document.getElementById('fname').value.trim();
+        const ln = document.getElementById('lname').value.trim();
+        const em = document.getElementById('email').value.trim();
+        const ph = document.getElementById('phone').value.trim();
+        if (!fn || !ln || !em || !ph) { showError(4, 'Please fill in all required fields.'); return false; }
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+        if (!emailOk) { showError(4, 'Please enter a valid email address.'); return false; }
+      }
+      return true;
+    }
+
+    function showError(step, msg) {
+      const el = document.getElementById('err-' + step);
+      if (el) { el.textContent = msg; el.style.display = 'block'; }
+    }
+
+    /* ── Summary ── */
+    function renderSummary() {
+      const svc  = SERVICES[state.serviceId];
+      const barb = BARBERS[state.barberId];
+      const dateStr = new Date(state.date + 'T12:00').toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      const fn = document.getElementById('fname').value.trim();
+      const ln = document.getElementById('lname').value.trim();
+      const em = document.getElementById('email').value.trim();
+
+      document.getElementById('booking-summary').innerHTML = `
+        <div class="summary-card-title">Booking Summary</div>
+        <div class="summary-row"><span class="key">Service</span><span class="val">${svc.name}</span></div>
+        <div class="summary-row"><span class="key">Barber</span><span class="val">${barb.name} — ${barb.spec}</span></div>
+        <div class="summary-row"><span class="key">Date</span><span class="val">${dateStr}</span></div>
+        <div class="summary-row"><span class="key">Time</span><span class="val">${state.time}</span></div>
+        <div class="summary-row"><span class="key">Duration</span><span class="val">${svc.duration} minutes</span></div>
+        <div class="summary-row"><span class="key">Name</span><span class="val">${fn} ${ln}</span></div>
+        <div class="summary-row"><span class="key">Email</span><span class="val">${em}</span></div>
+        <div class="summary-row total"><span class="key">Total</span><span class="val">£${svc.price}</span></div>
+      `;
+    }
+
+    /* ── Submit ── */
+    function submitBooking() {
+      const ref = 'SC' + Date.now().toString().slice(-6);
+      const booking = {
+        id: Date.now(),
+        ref,
+        serviceId: state.serviceId,
+        barberId:  state.barberId,
+        date:      state.date,
+        time:      state.time,
+        fname:     document.getElementById('fname').value.trim(),
+        lname:     document.getElementById('lname').value.trim(),
+        email:     document.getElementById('email').value.trim(),
+        phone:     document.getElementById('phone').value.trim(),
+        notes:     document.getElementById('notes').value.trim(),
+        status:    'confirmed',
+        createdAt: new Date().toISOString(),
+      };
+
+      // Persist to localStorage
+      const existing = JSON.parse(localStorage.getItem('sharpchair_bookings') || '[]');
+      existing.push(booking);
+      localStorage.setItem('sharpchair_bookings', JSON.stringify(existing));
+
+      document.getElementById('confirm-ref').textContent = `REF: #${ref}`;
+      setStep(6);
+      document.getElementById('step-progress').style.display = 'none';
+    }
+
+    /* ── Reset ── */
+    function resetWizard() {
+      state = { serviceId: null, barberId: null, date: null, time: null };
+      document.querySelectorAll('.pick-card, .barber-pick-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('booking-date').value = '';
+      document.getElementById('time-slots').innerHTML = '<span class="time-slot-hint">Pick a date first</span>';
+      document.getElementById('fname').value = '';
+      document.getElementById('lname').value = '';
+      document.getElementById('email').value = '';
+      document.getElementById('phone').value = '';
+      document.getElementById('notes').value = '';
+      document.getElementById('step-progress').style.display = '';
+      setStep(1);
+    }
+
+    /* ── Set min date ── */
+    (function() {
+      const inp = document.getElementById('booking-date');
+      const d = new Date();
+      while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1);
+      inp.min = d.toISOString().split('T')[0];
+    })();
+  </script>
+
+</body>
+</html>
